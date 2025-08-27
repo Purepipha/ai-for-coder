@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: ai-for-coder
+
+server:
+  port: 8389
+  servlet:
+    context-path: /ai-for-coder
+
+# springdoc-openapi http://localhost:8389/ai-for-coder/doc.html
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      packages-to-scan: com.muzi.aiforcoder.controller
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
