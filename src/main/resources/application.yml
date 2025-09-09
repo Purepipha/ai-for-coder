@@ -1,6 +1,9 @@
 spring:
-  application:
-    name: ai-for-coder
+  datasource:
+    url: jdbc:mysql://localhost:3306/ai_for_coder?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+
 
 server:
   port: 8389
@@ -19,3 +22,7 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+logging:
+  level:
+    com.muzi.aiforcoder.mapper: debug
