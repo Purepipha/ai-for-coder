@@ -21,10 +21,10 @@ public interface UserConstant {
     /**
      * 默认角色
      */
-    String DEFAULT_ROLE = UserRoleEnum.USER.getValue();
+    String DEFAULT_ROLE = "user";
 
     /**
      * 管理员角色
      */
-    String ADMIN_ROLE = UserRoleEnum.ADMIN.getValue();
+    String ADMIN_ROLE = "admin";
 }

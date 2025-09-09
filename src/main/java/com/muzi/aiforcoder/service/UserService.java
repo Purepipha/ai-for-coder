@@ -1,9 +1,14 @@
 package com.muzi.aiforcoder.service;
 
+import com.muzi.aiforcoder.model.dto.UserQueryRequest;
 import com.muzi.aiforcoder.model.entity.User;
 import com.muzi.aiforcoder.model.vo.LoginUserVo;
+import com.muzi.aiforcoder.model.vo.UserVo;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 /**
  *  服务层。
@@ -54,5 +59,29 @@ public interface UserService extends IService<User> {
      * @param request 要求
      * @return {@link LoginUserVo }
      */
-    LoginUserVo getLogUser(HttpServletRequest request);
+    User getLogUser(HttpServletRequest request);
+
+    /**
+     * 转移到用户vo
+     *
+     * @param user 用户
+     * @return {@link UserVo }
+     */
+    UserVo transferToUserVo(User user);
+
+    /**
+     * 转移用户VO列表
+     *
+     * @param userList 用户列表
+     * @return {@link List }<{@link UserVo }>
+     */
+    List<UserVo> transferUserVoList(List<User> userList);
+
+    /**
+     * 获取查询包装器
+     *
+     * @param userQueryRequest 用户查询请求
+     * @return {@link QueryWrapper }
+     */
+    QueryWrapper getQueryWrapper(UserQueryRequest userQueryRequest);
 }

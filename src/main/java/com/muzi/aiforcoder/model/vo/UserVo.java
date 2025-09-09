@@ -1,23 +1,18 @@
 package com.muzi.aiforcoder.model.vo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class LoginUserVo implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = -155930304055812826L;
+public class UserVo implements Serializable {
 
     /**
-     * 用户 id
+     * id
      */
     private Long id;
-
+    
     /**
      * 账号
      */
@@ -46,12 +41,7 @@ public class LoginUserVo implements Serializable {
     /**
      * 创建时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
-    /**
-     * 更新时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
+    private static final long serialVersionUID = 1L;
 }

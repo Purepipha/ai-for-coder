@@ -1,19 +1,25 @@
 package com.muzi.aiforcoder.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.muzi.aiforcoder.exception.ErrorCode;
 import com.muzi.aiforcoder.exception.ServiceException;
 import com.muzi.aiforcoder.mapper.UserMapper;
+import com.muzi.aiforcoder.model.dto.UserQueryRequest;
 import com.muzi.aiforcoder.model.entity.User;
 import com.muzi.aiforcoder.model.enums.UserRoleEnum;
 import com.muzi.aiforcoder.model.vo.LoginUserVo;
+import com.muzi.aiforcoder.model.vo.UserVo;
 import com.muzi.aiforcoder.service.UserService;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static com.muzi.aiforcoder.constant.UserConstant.USER_LOGIN_STATE;
@@ -131,13 +137,74 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
         return true;
     }
 
+    /**
+     * 获取日志用户
+     *
+     * @param request 要求
+     * @return {@link LoginUserVo }
+     */
     @Override
-    public LoginUserVo getLogUser(HttpServletRequest request) {
+    public User getLogUser(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         if (Objects.isNull(userObj)) {
             throw new ServiceException(ErrorCode.NOT_LOGIN_ERROR);
         }
-        return (LoginUserVo) userObj;
+        LoginUserVo loginUserVo = (LoginUserVo) userObj;
+        return this.getById(loginUserVo.getId());
+    }
+
+    /**
+     * 转移到用户vo
+     *
+     * @param user 用户
+     * @return {@link UserVo }
+     */
+    @Override
+    public UserVo transferToUserVo(User user) {
+        UserVo userVo = new UserVo();
+        BeanUtil.copyProperties(user, userVo);
+        return userVo;
+    }
+
+    /**
+     * 转移用户VO列表
+     *
+     * @param userList 用户列表
+     * @return {@link List }<{@link UserVo }>
+     */
+    @Override
+    public List<UserVo> transferUserVoList(List<User> userList) {
+        if (CollectionUtils.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream().map(this::transferToUserVo).toList();
+    }
+
+    /**
+     * 获取查询包装器
+     *
+     * @param userQueryRequest 用户查询请求
+     * @return {@link QueryWrapper }
+     */
+    @Override
+    public QueryWrapper getQueryWrapper(UserQueryRequest userQueryRequest) {
+        if (userQueryRequest == null) {
+            throw new ServiceException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = userQueryRequest.getId();
+        String userAccount = userQueryRequest.getUserAccount();
+        String userName = userQueryRequest.getUserName();
+        String userProfile = userQueryRequest.getUserProfile();
+        String userRole = userQueryRequest.getUserRole();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
+        return QueryWrapper.create()
+                .eq(User::getId, id)
+                .eq(User::getUserRole, userRole)
+                .like(User::getUserAccount, userAccount)
+                .like(User::getUserName, userName)
+                .like(User::getUserProfile, userProfile)
+                .orderBy(sortField, "ascend".equals(sortOrder));
     }
 
 
@@ -147,7 +214,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
      * @param loginUser 登录用户
      * @return {@link LoginUserVo }
      */
-    private static LoginUserVo getLoginUserVo(User loginUser) {
+    public static LoginUserVo getLoginUserVo(User loginUser) {
         LoginUserVo loginUserVo = new LoginUserVo();
         loginUserVo.setId(loginUser.getId());
         loginUserVo.setUserAccount(loginUser.getUserAccount());
