@@ -3,6 +3,10 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import logoUrl from '@/assets/logo.svg'
 import type { MenuProps } from 'ant-design-vue'
+import { useLoginUserStore } from '@/stores/loginUser.ts'
+
+// 获取登录用户状态
+const logUserStore = useLoginUserStore();
 
 // 定义菜单项类型
 interface MenuItem {
@@ -48,7 +52,7 @@ const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
 // 登录按钮点击处理
 const handleLogin = () => {
   console.log('点击登录')
-  // 这里可以添加登录逻辑
+  router.push('/user/login')
 }
 </script>
 
@@ -77,11 +81,22 @@ const handleLogin = () => {
       </div>
 
       <!-- 右侧区域 -->
-      <div class="header-right">
-        <a-button type="primary" @click="handleLogin">
-          登录
-        </a-button>
-      </div>
+      <a-col>
+        <div class="header-right">
+          <div v-if="logUserStore.loginUser.id">
+            <a-space align="center" class="user-info">
+              <a-avatar :src="logUserStore.loginUser.userAvatar"/>
+              <span class="user-name">{{logUserStore.loginUser.userName ?? '无名'}}</span>
+            </a-space>
+          </div>
+          <div v-else>
+            <a-button type="primary" @click="handleLogin">
+              登录
+            </a-button>
+          </div>
+        </div>
+      </a-col>
+
     </div>
   </a-layout-header>
 </template>
@@ -183,6 +198,17 @@ const handleLogin = () => {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 /* 响应式设计 */
