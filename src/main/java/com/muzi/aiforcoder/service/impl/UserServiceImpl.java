@@ -116,7 +116,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
             throw new ServiceException(ErrorCode.PARAMS_ERROR, "用户账号或密码错误");
         }
         LoginUserVo loginUserVO = getLoginUserVo(loginUser);
-        request.getSession().setAttribute("loginUser", loginUserVO);
+        request.getSession().setAttribute(USER_LOGIN_STATE, loginUserVO);
         return loginUserVO;
     }
 

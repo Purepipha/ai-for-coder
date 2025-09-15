@@ -3,7 +3,6 @@ package com.muzi.aiforcoder.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.muzi.aiforcoder.common.Result;
 import com.muzi.aiforcoder.common.anotation.AuthCheck;
-import com.muzi.aiforcoder.constant.UserConstant;
 import com.muzi.aiforcoder.exception.ErrorCode;
 import com.muzi.aiforcoder.exception.ServiceException;
 import com.muzi.aiforcoder.exception.ThrowUtils;
@@ -80,7 +79,7 @@ public class UserController {
      * @return {@link Result }<{@link Long }>
      */
     @PostMapping("/get")
-    Result<LoginUserVo> getLogUser(HttpServletRequest request) {
+    Result<LoginUserVo> getLoginUser(HttpServletRequest request) {
         return Result.ofSuccess(UserServiceImpl.getLoginUserVo(userService.getLogUser(request)));
     }
 
