@@ -25,6 +25,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ServiceException.class)
     public Result<?> serviceExceptionHandler(ServiceException serviceException) {
         log.error("service exception", serviceException);
-        return Result.ofSuccess(serviceException.getCode(), serviceException.getMessage());
+        return Result.ofFail(serviceException.getCode(), serviceException.getMessage());
     }
 }
