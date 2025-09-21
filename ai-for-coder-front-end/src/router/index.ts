@@ -1,8 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../pages/HomeView.vue'
-import UserLoginPage from '@/pages/user/UserLoginPage.vue'
-import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
-import UserManagePage from '@/pages/admin/UserManagePage.vue'
+
+const UserLoginPage = () => import('@/pages/user/UserLoginPage.vue')
+const UserRegisterPage = () => import('@/pages/user/UserRegisterPage.vue')
+const UserManagePage = () => import('@/pages/admin/UserManagePage.vue')
+
+// import UserLoginPage from '@/pages/user/UserLoginPage.vue'
+// import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
+// import UserManagePage from '@/pages/admin/UserManagePage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
