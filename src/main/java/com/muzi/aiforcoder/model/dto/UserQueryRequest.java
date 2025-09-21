@@ -7,6 +7,12 @@ import lombok.EqualsAndHashCode;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 用户查询请求
+ *
+ * @author muzi
+ * @date 2025/09/20
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UserQueryRequest extends PageRequest implements Serializable {
