@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getLoginUser } from '@/api/userController.ts'
+import { message } from 'ant-design-vue'
 
 /*
  * 存储登录用户
@@ -13,10 +14,15 @@ export const useLoginUserStore = defineStore('loginUser', () => {
 
   // 获取登录用户信息
   async function fetchLoginUser() {
-    const res = await getLoginUser()
-    if (res.data.code === 200 && res.data.data) {
-      loginUser.value = res.data.data
+    try {
+      const res = await getLoginUser()
+      if (res.data.code === 200 && res.data.data) {
+        loginUser.value = res.data.data
+      }
+    } catch (e) {
+      console.error(e)
     }
+
   }
   // 更新登录用户信息
   function setLoginUser(newLoginUser: any) {

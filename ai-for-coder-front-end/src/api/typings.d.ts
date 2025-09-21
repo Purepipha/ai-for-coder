@@ -142,5 +142,7 @@ declare namespace API {
     userProfile?: string
     userRole?: string
     createTime?: string
+    editTime?: string
+    updateTime?: string
   }
 }

@@ -2,12 +2,35 @@
 import GlobalHeader from '@/components/GlobalHeader.vue'
 import GlobalFooter from '@/components/GlobalFooter.vue'
 import { RouterView } from 'vue-router'
+import type { MenuProps } from 'ant-design-vue'
+import { computed } from 'vue'
+import { useLoginUserStore } from '@/stores/loginUser.ts'
+
+const loginUserStore = useLoginUserStore()
 
 // 菜单配置
-const menuItems = [
+const originalItems = [
   { key: 'home', label: '主页', path: '/' },
+  { key: 'userManage', label: '用户管理', path: '/admin/userManage' },
   { key: 'about', label: '关于', path: '/about' },
 ]
+
+const filterMenus = (menus = [] as MenuProps['items']) => {
+  return menus?.filter((menu) => {
+    const menuPath = menu?.path as string
+    if (menuPath?.startsWith('/admin')) {
+      const loginUser = loginUserStore.loginUser
+      if (!loginUser || loginUser.userRole !== 'admin') {
+        return false
+      }
+    }
+    return true
+  })
+}
+
+// 展示在菜单的路由数组
+const menuItems = computed<MenuProps['items']>(() => filterMenus(originalItems))
+
 </script>
 
 <template>

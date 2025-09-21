@@ -2,8 +2,9 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import logoUrl from '@/assets/logo.svg'
-import type { MenuProps } from 'ant-design-vue'
+import  { type MenuProps, message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser.ts'
+import { userLogout } from '@/api/userController.ts'
 
 // 获取登录用户状态
 const logUserStore = useLoginUserStore();
@@ -54,6 +55,19 @@ const handleLogin = () => {
   console.log('点击登录')
   router.push('/user/login')
 }
+
+const doLogout = async () => {
+  const res = await userLogout()
+  if (res.data.code === 200) {
+    logUserStore.setLoginUser({
+      userName: '未登录',
+    })
+    message.success('退出登录成功')
+    await router.push('/user/login')
+  } else {
+    message.error('退出登录失败，' + res.data.message)
+  }
+}
 </script>
 
 <template>
@@ -84,10 +98,20 @@ const handleLogin = () => {
       <a-col>
         <div class="header-right">
           <div v-if="logUserStore.loginUser.id">
-            <a-space align="center" class="user-info">
-              <a-avatar :src="logUserStore.loginUser.userAvatar"/>
-              <span class="user-name">{{logUserStore.loginUser.userName ?? '无名'}}</span>
-            </a-space>
+            <a-dropdown>
+              <a-space align="center" class="user-info">
+                <a-avatar :src="logUserStore.loginUser.userAvatar"/>
+                <span class="user-name">{{logUserStore.loginUser.userName ?? '无名'}}</span>
+              </a-space>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="profile" @click="doLogout">
+                    <LogoutOutlined />
+                    退出登录
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
           </div>
           <div v-else>
             <a-button type="primary" @click="handleLogin">
