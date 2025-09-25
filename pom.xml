@@ -33,6 +33,8 @@
         <mybatis-flex.version>1.11.1</mybatis-flex.version>
         <HikariCP.version>4.0.3</HikariCP.version>
         <mysql-connector-j.version>8.0.32</mysql-connector-j.version>
+        <langchain4j.version>1.5.0</langchain4j.version>
+
     </properties>
     <dependencies>
         <dependency>
@@ -43,6 +45,31 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-ollama</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-reactor</artifactId>
+            <version>1.5.0-beta11</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+            <version>1.5.0-beta11</version>
         </dependency>
         <dependency>
             <groupId>com.mybatis-flex</groupId>
