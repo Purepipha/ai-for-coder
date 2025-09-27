@@ -6,7 +6,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class LocalFlexCodegen {
 
-    private static final String[] TABLE_NAMES = {"user"};
+    private static final String[] TABLE_NAMES = {"web_app"};
 
     public static void main(String[] args) {
         //配置数据源
