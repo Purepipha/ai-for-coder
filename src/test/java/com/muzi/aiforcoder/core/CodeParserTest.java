@@ -2,6 +2,9 @@ package com.muzi.aiforcoder.core;
 
 import com.muzi.aiforcoder.ai.model.HtmlCodeResult;
 import com.muzi.aiforcoder.ai.model.MultiFileCodeResult;
+import com.muzi.aiforcoder.core.parser.CodeParser;
+import com.muzi.aiforcoder.core.parser.CodeParserExecutor;
+import com.muzi.aiforcoder.model.enums.CodeGenTypeEnum;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +28,8 @@ class CodeParserTest {
                 ```
                 随便写一段描述
                 """;
-        HtmlCodeResult result = CodeParser.parseHtmlCode(codeContent);
+        HtmlCodeResult result = (HtmlCodeResult) CodeParserExecutor.parseCode(codeContent,
+                CodeGenTypeEnum.HTML);
         assertNotNull(result);
         assertNotNull(result.getHtmlCode());
     }
@@ -59,7 +63,8 @@ class CodeParserTest {
                 文件创建完成
                 ```
                 """;
-        MultiFileCodeResult result = CodeParser.parseMultiFileCode(codeContent);
+        MultiFileCodeResult result = (MultiFileCodeResult) CodeParserExecutor.parseCode(codeContent,
+                CodeGenTypeEnum.MULTI_FILE);
         assertNotNull(result);
         assertNotNull(result.getHtmlCode());
         assertNotNull(result.getCssCode());
