@@ -1,9 +1,10 @@
 package com.muzi.aiforcoder.core;
 
-
 import com.muzi.aiforcoder.ai.model.HtmlCodeResult;
 import com.muzi.aiforcoder.ai.model.MultiFileCodeResult;
 import com.muzi.aiforcoder.ai.service.AiCodeGeneratorService;
+import com.muzi.aiforcoder.core.parser.CodeParserExecutor;
+import com.muzi.aiforcoder.core.saver.CodeFileSaveExecutor;
 import com.muzi.aiforcoder.exception.ErrorCode;
 import com.muzi.aiforcoder.exception.ServiceException;
 import com.muzi.aiforcoder.model.enums.CodeGenTypeEnum;
@@ -50,37 +51,7 @@ public class AiCodeGeneratorFacade {
         if (Objects.isNull(codeGenTypeEnum)) {
             throw new ServiceException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
-        return switch (codeGenTypeEnum) {
-            case HTML -> generateSaveHtmlStream(userMessage);
-            case MULTI_FILE -> generateSaveMultiFileStream(userMessage);
-        };
-    }
-
-
-    /**
-     * 生成保存多文件流
-     *
-     * @param userMessage 用户消息
-     * @return {@link Flux }<{@link String }>
-     */
-    private Flux<String> generateSaveMultiFileStream(String userMessage) {
-        Flux<String> result = aiCodeGeneratorService.generateMultiFileCodeStream(userMessage);
-        StringBuilder codeBuilder = new StringBuilder();
-        return result
-                .doOnNext(chunk -> {
-                    codeBuilder.append(chunk);
-                    log.info("chunk = {}", chunk);
-                })
-                .doOnComplete(() -> {
-                    try {
-                        String completeMultiFileCode = codeBuilder.toString();
-                        MultiFileCodeResult multiFileCodeResult = CodeParser.parseMultiFileCode(completeMultiFileCode);
-                        File saveDir = CodeFileSaver.saveMultifileCodeResult(multiFileCodeResult);
-                        log.info("save multifile code result success, path = {}", saveDir.getAbsolutePath());
-                    } catch (Exception e) {
-                        log.error("save multifile code result error", e);
-                    }
-                });
+        return generateSaveHtmlStream(userMessage, codeGenTypeEnum);
     }
 
     /**
@@ -89,7 +60,7 @@ public class AiCodeGeneratorFacade {
      * @param userMessage 用户消息
      * @return {@link Flux }<{@link String }>
      */
-    private Flux<String> generateSaveHtmlStream(String userMessage) {
+    private Flux<String> generateSaveHtmlStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum) {
         Flux<String> result = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
         StringBuilder codeBuilder = new StringBuilder();
         return result
@@ -97,8 +68,8 @@ public class AiCodeGeneratorFacade {
                 .doOnComplete(() -> {
                     try {
                         String completeHtmlFileCode = codeBuilder.toString();
-                        HtmlCodeResult htmlCodeResult = CodeParser.parseHtmlCode(completeHtmlFileCode);
-                        File saveDir = CodeFileSaver.saveHtmlCodeResult(htmlCodeResult);
+                        Object codeResult = CodeParserExecutor.parseCode(completeHtmlFileCode, codeGenTypeEnum);
+                        File saveDir = CodeFileSaveExecutor.saveCodeFile(codeResult, codeGenTypeEnum);
                         log.info("save html code result success, path = {}", saveDir.getAbsolutePath());
                     } catch (Exception e) {
                         log.error("save html code result error", e);
