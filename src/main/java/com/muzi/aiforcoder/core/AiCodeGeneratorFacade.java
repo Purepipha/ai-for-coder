@@ -4,6 +4,7 @@ import com.muzi.aiforcoder.ai.model.HtmlCodeResult;
 import com.muzi.aiforcoder.ai.model.MultiFileCodeResult;
 import com.muzi.aiforcoder.ai.service.AiCodeGeneratorService;
 import com.muzi.aiforcoder.core.parser.CodeParserExecutor;
+import com.muzi.aiforcoder.core.parser.HtmlCodeParser;
 import com.muzi.aiforcoder.core.saver.CodeFileSaveExecutor;
 import com.muzi.aiforcoder.exception.ErrorCode;
 import com.muzi.aiforcoder.exception.ServiceException;
@@ -17,10 +18,9 @@ import java.io.File;
 import java.util.Objects;
 
 /**
- *
+ * AI代码生成器立面
  *
  * @author muzi
- * @version 1.0
  * @date 2025/9/24 - 20:07
  */
 @Slf4j
@@ -41,10 +41,17 @@ public class AiCodeGeneratorFacade {
         if (Objects.isNull(codeGenTypeEnum)) {
             throw new ServiceException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
-        return switch (codeGenTypeEnum) {
-            case HTML -> generateSaveHtmlCode(userMessage);
-            case MULTI_FILE -> generateSaveMultiFileCode(userMessage);
-        };
+        switch (codeGenTypeEnum) {
+            case HTML -> {
+                HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
+                return CodeFileSaveExecutor.saveCodeFile(htmlCodeResult, CodeGenTypeEnum.HTML);
+            }
+            case MULTI_FILE -> {
+                MultiFileCodeResult multiFileCodeResult = aiCodeGeneratorService.generateMultiFileCode(userMessage);
+                return CodeFileSaveExecutor.saveCodeFile(multiFileCodeResult, CodeGenTypeEnum.MULTI_FILE);
+            }
+            default -> throw new ServiceException(ErrorCode.SYSTEM_ERROR, "生成类型错误");
+        }
     }
 
     public Flux<String> generateSaveCodeStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum) {
@@ -75,15 +82,5 @@ public class AiCodeGeneratorFacade {
                         log.error("save html code result error", e);
                     }
                 });
-    }
-
-    private File generateSaveMultiFileCode(String userMessage) {
-        MultiFileCodeResult multiFileCodeResult = aiCodeGeneratorService.generateMultiFileCode(userMessage);
-        return CodeFileSaver.saveMultifileCodeResult(multiFileCodeResult);
-    }
-
-    private File generateSaveHtmlCode(String userMessage) {
-        HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
-        return CodeFileSaver.saveHtmlCodeResult(htmlCodeResult);
     }
 }
