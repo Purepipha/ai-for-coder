@@ -56,9 +56,10 @@ create table if not exists web_app
     cover         varchar(512)                           not null comment '封面',
     code_gen_type varchar(50)                            not null comment '代码生成类型',
     user_id       bigint                                 not null comment '用户id',
-    deploy_key    varchar(30)                            not null comment '部署唯一键',
+    deploy_key    varchar(30)                                null comment '部署唯一键',
     deploy_time   datetime                                   null comment '部署时间',
     priority      int          default 0                 not null comment '优先级',
+    edit_time     datetime     default CURRENT_TIMESTAMP not null comment '编辑时间',
     create_time   datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
     update_time   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete     tinyint      default 0                 not null comment '是否删除',
@@ -66,3 +67,4 @@ create table if not exists web_app
     INDEX idx_user_id (user_id),
     INDEX idx_app_name (app_name)
 ) comment '网络应用' collate = utf8mb4_unicode_ci;
+

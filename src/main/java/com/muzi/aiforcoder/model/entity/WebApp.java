@@ -78,6 +78,11 @@ public class WebApp implements Serializable {
     /**
      * 创建时间
      */
+    private LocalDateTime editTime;
+
+    /**
+     * 创建时间
+     */
     private LocalDateTime createTime;
 
     /**
