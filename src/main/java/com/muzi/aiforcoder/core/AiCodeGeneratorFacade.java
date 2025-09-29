@@ -35,39 +35,49 @@ public class AiCodeGeneratorFacade {
      *
      * @param userMessage     用户消息
      * @param codeGenTypeEnum 代码一代类型枚举
+     * @param appId           应用ID
      * @return {@link File }
      */
-    public File generateSaveCode(String userMessage, CodeGenTypeEnum codeGenTypeEnum) {
+    public File generateSaveCode(String userMessage, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         if (Objects.isNull(codeGenTypeEnum)) {
             throw new ServiceException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
         switch (codeGenTypeEnum) {
             case HTML -> {
                 HtmlCodeResult htmlCodeResult = aiCodeGeneratorService.generateHtmlCode(userMessage);
-                return CodeFileSaveExecutor.saveCodeFile(htmlCodeResult, CodeGenTypeEnum.HTML);
+                return CodeFileSaveExecutor.saveCodeFile(htmlCodeResult, CodeGenTypeEnum.HTML, appId);
             }
             case MULTI_FILE -> {
                 MultiFileCodeResult multiFileCodeResult = aiCodeGeneratorService.generateMultiFileCode(userMessage);
-                return CodeFileSaveExecutor.saveCodeFile(multiFileCodeResult, CodeGenTypeEnum.MULTI_FILE);
+                return CodeFileSaveExecutor.saveCodeFile(multiFileCodeResult, CodeGenTypeEnum.MULTI_FILE, appId);
             }
             default -> throw new ServiceException(ErrorCode.SYSTEM_ERROR, "生成类型错误");
         }
     }
 
-    public Flux<String> generateSaveCodeStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum) {
+    /**
+     * 生成保存代码流
+     *
+     * @param userMessage     用户消息
+     * @param codeGenTypeEnum 代码一代类型枚举
+     * @return {@link Flux }<{@link String }>
+     */
+    public Flux<String> generateSaveCodeStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         if (Objects.isNull(codeGenTypeEnum)) {
             throw new ServiceException(ErrorCode.SYSTEM_ERROR, "生成类型为空");
         }
-        return generateSaveHtmlStream(userMessage, codeGenTypeEnum);
+        return generateSaveHtmlStream(userMessage, codeGenTypeEnum, appId);
     }
 
     /**
      * 生成保存保存html流
      *
-     * @param userMessage 用户消息
+     * @param userMessage     用户消息
+     * @param codeGenTypeEnum 代码一代类型枚举
+     * @param appId           应用ID
      * @return {@link Flux }<{@link String }>
      */
-    private Flux<String> generateSaveHtmlStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum) {
+    private Flux<String> generateSaveHtmlStream(String userMessage, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         Flux<String> result = aiCodeGeneratorService.generateHtmlCodeStream(userMessage);
         StringBuilder codeBuilder = new StringBuilder();
         return result
@@ -76,7 +86,7 @@ public class AiCodeGeneratorFacade {
                     try {
                         String completeHtmlFileCode = codeBuilder.toString();
                         Object codeResult = CodeParserExecutor.parseCode(completeHtmlFileCode, codeGenTypeEnum);
-                        File saveDir = CodeFileSaveExecutor.saveCodeFile(codeResult, codeGenTypeEnum);
+                        File saveDir = CodeFileSaveExecutor.saveCodeFile(codeResult, codeGenTypeEnum, appId);
                         log.info("save html code result success, path = {}", saveDir.getAbsolutePath());
                     } catch (Exception e) {
                         log.error("save html code result error", e);

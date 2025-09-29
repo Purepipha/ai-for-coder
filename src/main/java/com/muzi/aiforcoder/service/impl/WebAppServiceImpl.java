@@ -2,12 +2,16 @@ package com.muzi.aiforcoder.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import com.muzi.aiforcoder.core.AiCodeGeneratorFacade;
 import com.muzi.aiforcoder.exception.ErrorCode;
 import com.muzi.aiforcoder.exception.ServiceException;
+import com.muzi.aiforcoder.exception.ThrowUtils;
 import com.muzi.aiforcoder.mapper.WebAppMapper;
 import com.muzi.aiforcoder.model.dto.WebAppQueryRequest;
 import com.muzi.aiforcoder.model.entity.User;
 import com.muzi.aiforcoder.model.entity.WebApp;
+import com.muzi.aiforcoder.model.enums.CodeGenTypeEnum;
 import com.muzi.aiforcoder.model.vo.UserVo;
 import com.muzi.aiforcoder.model.vo.WebAppVo;
 import com.muzi.aiforcoder.service.UserService;
@@ -15,14 +19,15 @@ import com.muzi.aiforcoder.service.WebAppService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +40,8 @@ public class WebAppServiceImpl extends ServiceImpl<WebAppMapper, WebApp> impleme
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private AiCodeGeneratorFacade aiCodeGeneratorFacade;
 
     @Override
     public void validWebApp(WebApp webApp, boolean add) {
@@ -148,5 +155,42 @@ public class WebAppServiceImpl extends ServiceImpl<WebAppMapper, WebApp> impleme
         List<WebAppVo> webAppVoList = getWebAppVoList(webAppPage.getRecords());
         webAppVoPage.setRecords(webAppVoList);
         return webAppVoPage;
+    }
+
+    /**
+     * 聊天代码
+     *
+     * @param appId     应用ID
+     * @param message   信息
+     * @param loginUser 登录用户
+     * @return {@link Flux }<{@link String }>
+     */
+    @Override
+    public Flux<ServerSentEvent<String>> chatToGenCode(Long appId, String message, User loginUser) {
+        ThrowUtils.throwIf(appId == null || appId <= 0, ErrorCode.PARAMS_ERROR, "应用id不正确");
+        ThrowUtils.throwIf(StringUtils.isBlank(message), ErrorCode.PARAMS_ERROR, "用户消息不能为空");
+        WebApp webApp = this.getById(appId);
+        ThrowUtils.throwIf(webApp == null, ErrorCode.PARAMS_ERROR, "应用不存在");
+        if (!webApp.getUserId().equals(loginUser.getId())) {
+            throw new ServiceException(ErrorCode.NO_AUTH_ERROR, "无权限访问该应用");
+        }
+        CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(webApp.getCodeGenType());
+        if (Objects.isNull(codeGenTypeEnum)) {
+            throw new ServiceException(ErrorCode.SYSTEM_ERROR, "不支持的代码生成类型");
+        }
+        return aiCodeGeneratorFacade.generateSaveCodeStream(message, codeGenTypeEnum, appId)
+                .map(chunk -> {
+                    Map<String, String> keyValueMap = Map.of("d", chunk);
+                    String jsonData = JSONUtil.toJsonStr(keyValueMap);
+                    return ServerSentEvent.<String>builder()
+                            .data(jsonData)
+                            .build();
+                })
+                .concatWith(Mono.just(
+                        ServerSentEvent.<String>builder()
+                                .event("done")
+                                .data("")
+                                .build()
+                ));
     }
 }

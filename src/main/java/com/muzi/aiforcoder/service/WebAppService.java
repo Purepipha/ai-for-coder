@@ -1,11 +1,14 @@
 package com.muzi.aiforcoder.service;
 
 import com.muzi.aiforcoder.model.dto.WebAppQueryRequest;
+import com.muzi.aiforcoder.model.entity.User;
 import com.muzi.aiforcoder.model.entity.WebApp;
 import com.muzi.aiforcoder.model.vo.WebAppVo;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
+import org.springframework.http.codec.ServerSentEvent;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -64,4 +67,14 @@ public interface WebAppService extends IService<WebApp> {
      * @return 分页结果
      */
     Page<WebAppVo> listWebAppVoByPageForUser(WebAppQueryRequest webAppQueryRequest, Long userId);
+
+    /**
+     * 聊天代码
+     *
+     * @param appId     应用ID
+     * @param message   信息
+     * @param loginUser 登录用户
+     * @return {@link Flux }<{@link String }>
+     */
+    Flux<ServerSentEvent<String>> chatToGenCode(Long appId, String message, User loginUser);
 }

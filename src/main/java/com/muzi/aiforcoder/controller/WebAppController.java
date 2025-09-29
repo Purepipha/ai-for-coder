@@ -18,7 +18,10 @@ import com.muzi.aiforcoder.service.WebAppService;
 import com.mybatisflex.core.paginate.Page;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 
@@ -207,5 +210,18 @@ public class WebAppController {
         WebApp webApp = webAppService.getById(id);
         ThrowUtils.throwIf(webApp == null, ErrorCode.NOT_FOUND_ERROR);
         return Result.ofSuccess(webApp);
+    }
+
+    /**
+     * 聊天代码
+     *
+     * @param appId   应用ID
+     * @param message 信息
+     * @return {@link Flux }<{@link String }>
+     */
+    @GetMapping(value = "/chat/gen/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> chatToGenCode(Long appId, String message, HttpServletRequest request) {
+        User logUser = userService.getLogUser(request);
+        return webAppService.chatToGenCode(appId, message, logUser);
     }
 }

@@ -29,10 +29,10 @@ public class CodeFileSaveExecutor {
      * @param codeGenTypeEnum 代码一代类型枚举
      * @return {@link File }
      */
-    public static File saveCodeFile(Object result, CodeGenTypeEnum codeGenTypeEnum) {
+    public static File saveCodeFile(Object result, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         return switch (codeGenTypeEnum) {
-            case HTML -> htmlCodeFileSaver.saveCode((HtmlCodeResult) result);
-            case MULTI_FILE -> multiFileCodeSaver.saveCode((MultiFileCodeResult) result);
+            case HTML -> htmlCodeFileSaver.saveCode((HtmlCodeResult) result, appId);
+            case MULTI_FILE -> multiFileCodeSaver.saveCode((MultiFileCodeResult) result, appId);
             default -> throw new ServiceException(ErrorCode.SYSTEM_ERROR, "类型不正确")
                     ;
         };
