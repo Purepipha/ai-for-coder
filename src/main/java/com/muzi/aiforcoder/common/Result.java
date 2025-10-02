@@ -76,18 +76,6 @@ public class Result<T> implements Serializable {
         this.description = description;
     }
 
-
-    /**
-     * 成功
-     *
-     * @param data    数据
-     * @param message 消息
-     * @return {@link Result}<{@link T}>
-     */
-    public static <T> Result<T> ofSuccess(T data, String message) {
-        return new Result<T>(200, data, message);
-    }
-
     /**
      * 成功
      *

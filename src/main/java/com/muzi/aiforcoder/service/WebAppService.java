@@ -1,5 +1,6 @@
 package com.muzi.aiforcoder.service;
 
+import com.muzi.aiforcoder.model.dto.WebAppDeployRequest;
 import com.muzi.aiforcoder.model.dto.WebAppQueryRequest;
 import com.muzi.aiforcoder.model.entity.User;
 import com.muzi.aiforcoder.model.entity.WebApp;
@@ -77,4 +78,13 @@ public interface WebAppService extends IService<WebApp> {
      * @return {@link Flux }<{@link String }>
      */
     Flux<ServerSentEvent<String>> chatToGenCode(Long appId, String message, User loginUser);
+
+    /**
+     * 部署Web应用程序
+     *
+     * @param webAppDeployRequest Web应用程序部署请求
+     * @param loginUser           登录用户
+     * @return {@link String }
+     */
+    String deployWebApp(WebAppDeployRequest webAppDeployRequest, User loginUser);
 }

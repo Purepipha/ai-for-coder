@@ -111,7 +111,7 @@ public class WebAppController {
             throw new ServiceException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = webAppService.removeById(deleteRequest.getId());
-        return Result.ofSuccess(result);
+        return Result.ofSuccess("删除成功", result);
     }
 
     /**
@@ -162,7 +162,7 @@ public class WebAppController {
             throw new ServiceException(ErrorCode.PARAMS_ERROR);
         }
         boolean result = webAppService.removeById(deleteRequest.getId());
-        return Result.ofSuccess(result);
+        return Result.ofSuccess("删除成功", result);
     }
 
     /**
@@ -223,5 +223,19 @@ public class WebAppController {
     public Flux<ServerSentEvent<String>> chatToGenCode(Long appId, String message, HttpServletRequest request) {
         User logUser = userService.getLogUser(request);
         return webAppService.chatToGenCode(appId, message, logUser);
+    }
+
+    /**
+     * 部署应用
+     *
+     * @param webAppDeployRequest Web应用程序部署请求
+     * @param request             要求
+     * @return {@link Result }<{@link String }>
+     */
+    @PostMapping(value = "/deploy")
+    public Result<String> deployApp(@RequestBody WebAppDeployRequest webAppDeployRequest, HttpServletRequest request) {
+        ThrowUtils.throwIf(webAppDeployRequest == null, ErrorCode.PARAMS_ERROR);
+        User logUser = userService.getLogUser(request);
+        return Result.ofSuccess("部署成功", webAppService.deployWebApp(webAppDeployRequest, logUser));
     }
 }

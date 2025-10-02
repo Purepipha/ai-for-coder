@@ -1,13 +1,17 @@
 package com.muzi.aiforcoder.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import com.muzi.aiforcoder.constant.WebAppConstant;
 import com.muzi.aiforcoder.core.AiCodeGeneratorFacade;
 import com.muzi.aiforcoder.exception.ErrorCode;
 import com.muzi.aiforcoder.exception.ServiceException;
 import com.muzi.aiforcoder.exception.ThrowUtils;
 import com.muzi.aiforcoder.mapper.WebAppMapper;
+import com.muzi.aiforcoder.model.dto.WebAppDeployRequest;
 import com.muzi.aiforcoder.model.dto.WebAppQueryRequest;
 import com.muzi.aiforcoder.model.entity.User;
 import com.muzi.aiforcoder.model.entity.WebApp;
@@ -19,6 +23,7 @@ import com.muzi.aiforcoder.service.WebAppService;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.codec.ServerSentEvent;
@@ -27,6 +32,10 @@ import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +44,7 @@ import java.util.stream.Collectors;
  *
  * @author <a href="https://github.com/Purepipha">muzi</a>
  */
+@Slf4j
 @Service
 public class WebAppServiceImpl extends ServiceImpl<WebAppMapper, WebApp> implements WebAppService {
 
@@ -192,5 +202,50 @@ public class WebAppServiceImpl extends ServiceImpl<WebAppMapper, WebApp> impleme
                                 .data("")
                                 .build()
                 ));
+    }
+
+    /**
+     * 部署Web应用程序
+     *
+     * @param webAppDeployRequest Web应用程序部署请求
+     * @param loginUser           登录用户
+     * @return {@link String }
+     */
+    @Override
+    public String deployWebApp(WebAppDeployRequest webAppDeployRequest, User loginUser) {
+        Long webAppId = webAppDeployRequest.getWebAppId();
+        ThrowUtils.throwIf(Objects.isNull(webAppId) || webAppId < 0, ErrorCode.PARAMS_ERROR,
+                "应用id不能为空");
+        ThrowUtils.throwIf(Objects.isNull(loginUser), ErrorCode.NOT_LOGIN_ERROR, "用户未登录");
+        WebApp webApp = this.getById(webAppId);
+        ThrowUtils.throwIf(Objects.isNull(webApp), ErrorCode.PARAMS_ERROR, "应用不存在");
+        if (!webApp.getUserId().equals(loginUser.getId())) {
+            throw new ServiceException(ErrorCode.NO_AUTH_ERROR, "没有权限进行部署");
+        }
+        String appDeployKey = webApp.getDeployKey();
+        if (StringUtils.isBlank(appDeployKey)) {
+            appDeployKey = RandomUtil.randomString(6);
+        }
+        String codeGenType = webApp.getCodeGenType();
+        String sourceDirName = codeGenType + "_" + webAppId;
+        String sourceDirPath = WebAppConstant.CODE_OUTPUT_DIR + "/" + sourceDirName;
+        File sourceDir = new File(sourceDirPath);
+        if (!sourceDir.exists() || !sourceDir.isDirectory()) {
+            throw new ServiceException(ErrorCode.SYSTEM_ERROR, "应用代码不存在，请先生成应用代码");
+        }
+        String deployDirPath = WebAppConstant.CODE_DEPLOY_DIR + "/" + appDeployKey;
+        try {
+            FileUtil.copyContent(sourceDir, new File(deployDirPath), true);
+        } catch (Exception exception) {
+            log.error("web app deploy fail! appId = {}", webAppId, exception);
+            throw new ServiceException(ErrorCode.SYSTEM_ERROR, "部署失败" + exception.getMessage());
+        }
+        WebApp updateWebApp = new WebApp();
+        updateWebApp.setId(webAppId);
+        updateWebApp.setDeployKey(appDeployKey);
+        updateWebApp.setDeployTime(LocalDateTime.now());
+        boolean updateSuccess = this.updateById(updateWebApp);
+        ThrowUtils.throwIf(!updateSuccess, ErrorCode.OPERATION_ERROR, "更新应用部署信息失败");
+        return MessageFormat.format("{0}/{1}/",WebAppConstant.CODE_DEPLOY_HOST, appDeployKey);
     }
 }

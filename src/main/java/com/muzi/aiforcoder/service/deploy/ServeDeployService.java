@@ -1,11 +1,11 @@
 package com.muzi.aiforcoder.service.deploy;
 
-
-import dev.langchain4j.agent.tool.P;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
+
+import static com.muzi.aiforcoder.constant.WebAppConstant.CODE_OUTPUT_DIR;
 
 /**
  *
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 public class ServeDeployService {
-    private static final String SERVE_DEPLOY_PATH = System.getProperty("user.dir") + "/tmp/code_output";
+    private static final String SERVE_DEPLOY_PATH = CODE_OUTPUT_DIR;
 
     private static final int SERVE_PORT = 3562;
 
